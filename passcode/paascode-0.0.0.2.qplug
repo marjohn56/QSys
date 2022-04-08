@@ -6,7 +6,7 @@ PluginInfo = {
     Name = "Passcode (0.0.0.2-master)", -- The tilde here indicates folder structure in the Shematic Elements pane
     Version = "0.0.0.2-master",
     Id = "qsysc.passcode.0.0.0.2-master", -- show this is just a unique id. Show some commented out 'fun' unique ids
-    Description = "Passcode module",
+    Description = "Passcode module with hidden option",
     ShowDebug = true,
     Author = "M.J. Wasley"
 }
