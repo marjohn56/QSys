@@ -1,0 +1,639 @@
+-- Plugin for Generic Keypad Passcode
+-- Built in Lua
+
+
+PluginInfo = {
+    Name = "Passcode (0.0.0.2-master)", -- The tilde here indicates folder structure in the Shematic Elements pane
+    Version = "0.0.0.2-master",
+    Id = "qsysc.passcode.0.0.0.2-master", -- show this is just a unique id. Show some commented out 'fun' unique ids
+    Description = "Passcode module",
+    ShowDebug = true,
+    Author = "M.J. Wasley"
+}
+
+-- Once you've drawn your plugin in Designer, you can determine what colors you use a lot. Save yourself some time by putting them in a table, and then simply calling them later.
+local Colors = {
+    White = {255, 255, 255},
+    Black = {0, 0, 0},
+    Red = {255, 0, 0},
+    Green = {0, 255, 0}
+}
+
+-- We can let users determine some of the plugin properties by exposing them here
+-- While this function can be very useful, it is completely optional and not always needed.
+-- If no Properties are set here, only the position and fill properties of your plugin will show in the Properties pane
+function GetProperties()
+    props = {
+        {
+            Name = "Password",
+            Type = "string",
+            Value = "1234"
+        },		
+    }
+    return props
+end
+
+
+-- The below function is optional (like GetProperties() is), but it can allow further customization of what users can and can't do with your plugin.
+-- In this example, when Model 1 is selected in the properties pane, the ability to modify some of the properties will be Hidden, only allowing customization with Model 2
+-- Another application of this is if you have different input/output types for different models, and want those properties to be dynamic in the Properties pane
+function RectifyProperties(props)
+    return props
+end
+
+-- The below function is where you will populate the controls for your plugin.
+-- If you've written some of the Runtime code already, simply use the control names you populated in Text Controller/Control Script, and use their Properties to inform the values here
+-- ControlType can be Button, Knob, Indicator or Text
+-- ButtonType ( ControlType == Button ) can be Momentary, Toggle or Trigger
+-- IndicatorType ( ControlType == Indicator ) can be Led, Meter, Text or Status
+-- ControlUnit ( ControlType == Knob ) can be Hz, Float, Integer, Pan, Percent, Position or  Seconds
+
+
+function GetControls(props)
+    ctls = {
+        -- System Pins
+        {
+            Name = "Password_Match",
+            ControlType = "Indicator",
+            IndicatorType = "Led",
+            PinStyle = "Output",
+            Count = 1,
+            UserPin = true
+        },
+		{
+            Name = "Password_Failed",
+            ControlType = "Indicator",
+            IndicatorType = "Led",
+            PinStyle = "Output",
+            Count = 1,
+            UserPin = true
+        },
+		{
+            Name = "Password_in",
+            ControlType = "Text",
+            PinStyle = "Both",
+            Count = 1,
+            UserPin = true
+        }, 
+        {
+            Name = "Hidden_Txt",
+            ControlType = "Text",
+            PinStyle = "Both",
+            Count = 1,
+            UserPin = true
+        }, 
+        {
+            Name = "Key_1",
+            ControlType = "Button",
+            ButtonType = "Momentary",
+            PinStyle = "None",
+            Count = 1,
+            UserPin = false
+        },
+		{
+            Name = "Key_2",
+            ControlType = "Button",
+            ButtonType = "Momentary",
+            PinStyle = "None",
+            Count = 1,
+            UserPin = false
+        },
+        {
+           Name = "Key_3",
+            ControlType = "Button",
+            ButtonType = "Momentary",
+            PinStyle = "None",
+            Count = 1,
+            UserPin = false
+        },
+        {
+           Name = "Key_4",
+            ControlType = "Button",
+            ButtonType = "Momentary",
+            PinStyle = "None",
+            Count = 1,
+            UserPin = false
+        },
+        {
+           Name = "Key_5",
+            ControlType = "Button",
+            ButtonType = "Momentary",
+            PinStyle = "None",
+            Count = 1,
+            UserPin = false
+        },
+		{
+           Name = "Key_6",
+            ControlType = "Button",
+            ButtonType = "Momentary",
+            PinStyle = "None",
+            Count = 1,
+            UserPin = false
+        },
+		{
+            Name = "Key_7",
+            ControlType = "Button",
+            ButtonType = "Momentary",
+            PinStyle = "None",
+            Count = 1,
+            UserPin = false
+        },
+		{
+            Name = "Key_8",
+            ControlType = "Button",
+            ButtonType = "Momentary",
+            PinStyle = "None",
+            Count = 1,
+            UserPin = false
+        },
+		{
+            Name = "Key_9",
+            ControlType = "Button",
+            ButtonType = "Momentary",
+            PinStyle = "None",
+            Count = 1,
+            UserPin = false
+        },
+		{
+           Name = "Key_0",
+            ControlType = "Button",
+            ButtonType = "Momentary",
+            PinStyle = "None",
+            Count = 1,
+            UserPin = false
+        },
+		{
+           Name = "Key_#",
+            ControlType = "Button",
+            ButtonType = "Momentary",
+            PinStyle = "None",
+            Count = 1,
+            UserPin = false
+        },
+		{
+            Name = "Key_*",
+            ControlType = "Button",
+            ButtonType = "Momentary",
+            PinStyle = "None",
+            Count = 1,
+            UserPin = false
+        },
+		{
+            Name = "Key_Enter",
+            ControlType = "Button",
+            ButtonType = "Momentary",
+            PinStyle = "None",
+            Count = 1,
+            UserPin = false
+        },
+		{
+            Name = "Key_Clear",
+            ControlType = "Button",
+            ButtonType = "Momentary",
+            PinStyle = "Input",
+            Count = 1,
+            UserPin = true
+        }		
+				
+    } 
+    return ctls
+end
+
+-- This function allows you to layout pages in your plugin.
+function GetControlLayout(props)
+    local layout = {}
+    -- System
+    layout["Password_Match"] = {
+        PrettyName = "Password Match",
+        Style = "Indicator",
+        Color = {0, 255, 0},
+        Position = {100, 00},
+        Size = {20, 20}
+    }
+	layout["Password_Failed"] = {
+        PrettyName = "Password Fail",
+        Style = "Indicator",
+        Color = {255, 0, 0},
+        Position = {100, 30},
+        Size = {20, 20}
+    }
+	layout["Password_in"] = {
+        PrettyName = "Password",
+        Style = "TextBox",
+        Position = {65, 280},
+        Size = {120, 20}
+    }
+    layout["Hidden_Txt"] = {
+        PrettyName = "Hidden",
+        Style = "TextBox",
+        Position = {65, 300},
+        Size = {120, 20}
+    }
+	-- Keypad
+	layout["Key_1"] = {
+        PrettyName = "Keypad 1",
+        Style = "Button",
+		Legend = "1",
+        ButtonStyle = "Momentary",
+        Color = {223, 0, 36},
+        UnlinkOffColor = false,
+     	 Position = {60, 60},
+        Size = {30, 30}
+    }
+	layout["Key_2"] = {
+        PrettyName = "Keypad 2",
+        Style = "Button",
+		Legend = "2",
+        ButtonStyle = "Momentary",
+        Color = {223, 0, 36},
+        UnlinkOffColor = false,
+     	 Position = {110, 60},
+        Size = {30, 30}
+    }
+	layout["Key_3"] = {
+        PrettyName = "Keypad 3",
+        Style = "Button",
+		Legend = "3",
+        ButtonStyle = "Momentary",
+        Color = {223, 0, 36},
+        UnlinkOffColor = false,
+     	 Position = {160, 60},
+        Size = {30, 30}
+    }
+	layout["Key_4"] = {
+        PrettyName = "Keypad 4",
+        Style = "Button",
+		Legend = "4",
+        ButtonStyle = "Momentary",
+        Color = {223, 0, 36},
+        UnlinkOffColor = false,
+     	 Position = {60, 110},
+        Size = {30, 30}
+    }
+	layout["Key_5"] = {
+        PrettyName = "Keypad 5",
+        Style = "Button",
+		Legend = "5",
+        ButtonStyle = "Momentary",
+        Color = {223, 0, 36},
+        UnlinkOffColor = false,
+     	 Position = {110, 110},
+        Size = {30, 30}
+    }
+	layout["Key_6"] = {
+        PrettyName = "Keypad 6",
+        Style = "Button",
+		Legend = "6",
+        ButtonStyle = "Momentary",
+        Color = {223, 0, 36},
+        UnlinkOffColor = false,
+     	 Position = {160, 110},
+        Size = {30, 30}
+    }	
+	layout["Key_7"] = {
+        PrettyName = "Keypad 7",
+        Style = "Button",
+		Legend = "7",
+        ButtonStyle = "Momentary",
+        Color = {223, 0, 36},
+        UnlinkOffColor = false,
+     	 Position = {60, 160},
+        Size = {30, 30}
+    }
+	layout["Key_8"] = {
+        PrettyName = "Keypad 8",
+        Style = "Button",
+		Legend = "8",
+        ButtonStyle = "Momentary",
+        Color = {223, 0, 36},
+        UnlinkOffColor = false,
+     	 Position = {110, 160},
+        Size = {30, 30}
+    }
+	layout["Key_9"] = {
+        PrettyName = "Keypad 9",
+        Style = "Button",
+		Legend = "9",
+        ButtonStyle = "Momentary",
+        Color = {223, 0, 36},
+        UnlinkOffColor = false,
+     	 Position = {160, 160},
+        Size = {30, 30}
+    }
+	layout["Key_*"] = {
+        PrettyName = "Keypad *",
+        Style = "Button",
+		Legend = "*",
+        ButtonStyle = "Momentary",
+        Color = {223, 0, 36},
+        UnlinkOffColor = false,
+     	 Position = {60, 210},
+        Size = {30, 30}
+    }
+	layout["Key_0"] = {
+        PrettyName = "Keypad 0",
+		Legend = "0",
+        Style = "Button",
+        ButtonStyle = "Momentary",
+        Color = {223, 0, 36},
+        UnlinkOffColor = false,
+     	 Position = {110, 210},
+        Size = {30, 30}
+    }
+	layout["Key_#"] = {
+        PrettyName = "Keypad #",
+        Style = "Button",
+		Legend = "#",
+        ButtonStyle = "Momentary",
+        Color = {223, 0, 36},
+        UnlinkOffColor = false,
+     	 Position = {160, 210},
+        Size = {30, 30}
+    }
+	layout["Key_Enter"] = {
+        PrettyName = "Enter",
+        Style = "Button",
+		Legend = "Enter",
+        ButtonStyle = "Momentary",
+        Color = {223, 0, 36},
+        UnlinkOffColor = false,
+     	Position = {65, 250},
+        Size = {120, 30}
+		
+    }
+	layout["Key_Clear"] = {
+        PrettyName = "Clear",
+        Style = "Button",
+		Legend = "Clear",
+        ButtonStyle = "Momentary",
+        Color = {223, 0, 36},
+        UnlinkOffColor = false,
+     	Position = {65, 320},
+        Size = {120, 30}
+		
+    }
+	
+    graphics = {
+        {
+            Type = "GroupBox", -- This is the overall groupbox that will give the plugin a more 'contained' look
+            Text = "Info",
+            HTextAlign = "Left",
+            Fill = Colors.White,
+            CornerRadius = 8,
+            StrokeColor = Colors.Black,
+            StrokeWidth = 1,
+            Position = {0, 0},
+            Size = {220, 50} -- The width of the main GroupBox is dependent on how many channels the user specified. More channels means a wider group box
+        },
+        {
+            Type = "Text",
+            Text = "Matched:",
+            Font = "Roboto",
+            FontSize = 12,
+            FontStyle = "Bold",
+            HTextAlign = "Right",
+            Color = Colors.Black,
+            Position = {0, 0},
+            Size = {100, 20}
+        },
+		{
+            Type = "Text",
+            Text = "Failed:",
+            Font = "Roboto",
+            FontSize = 12,
+            FontStyle = "Bold",
+            HTextAlign = "Right",
+            Color = Colors.Black,
+            Position = {0, 30},
+            Size = {100, 20}
+        },
+
+        {
+            Type = "GroupBox",
+            Text = "Keypad",
+            HTextAlign = "Left",
+            Fill = Colors.White,
+            CornerRadius = 8,
+            StrokeColor = Colors.Black,
+            StrokeWidth = 1,
+            Position = {0, 55},
+            Size = {220, 310}
+        },		
+    }
+
+    return layout, graphics
+end
+
+function GetComponents(props)
+    return {
+        {
+            Name = "nic_storage",
+            Type = "scriptable_controls",
+            Properties = {
+                ["config"] = '[{"Name":"Core","ControlType":"Text","ButtonType":"Momentary","TextType":"TextBox","IndicatorType":"Led","ControlUnit":"dB","PinStyle":"None","Min":-100.0,"Max":12.0,"Count":1.0},{"Name":"Emul","ControlType":"Text","ButtonType":"Momentary","TextType":"TextBox","IndicatorType":"Led","ControlUnit":"dB","PinStyle":"None","Min":-100.0,"Max":12.0,"Count":1.0},{"Name":"lastIP","ControlType":"Text","ButtonType":"Momentary","TextType":"TextBox","IndicatorType":"Led","ControlUnit":"dB","PinStyle":"None","Min":-100.0,"Max":12.0,"Count":1.0},{"Name":"lastname","ControlType":"Text","ButtonType":"Momentary","TextType":"TextBox","IndicatorType":"Led","ControlUnit":"dB","PinStyle":"None","Min":-100.0,"Max":12.0,"Count":1.0}]'
+            }
+        },
+        {
+            Name = "rgb_storage",
+            Type = "scriptable_controls",
+            Properties = {
+                ["config"] = '[{"Name":"dis1_lastRGB","ControlType":"Text","ButtonType":"Momentary","TextType":"TextBox","IndicatorType":"Led","ControlUnit":"dB","PinStyle":"None","Min":-100.0,"Max":12.0,"Count":1.0}},{"Name":"dis2_lastRGB","ControlType":"Text","ButtonType":"Momentary","TextType":"TextBox","IndicatorType":"Led","ControlUnit":"dB","PinStyle":"None","Min":-100.0,"Max":12.0,"Count":1.0}}]'
+            }
+        }
+    }
+end
+
+if Controls then
+ -- Setup Event Handlers
+	Password	 = {
+        code =  ""
+    }
+	Passcode = ""
+	Hidden = ""
+	pulse_timer = Timer:New()
+	
+    for k, v in pairs(Controls) do
+        -- Setup Event Handler (IP Address Pin)
+        if k == "Key_1" then
+            v.EventHandler = function(changedControl)
+
+                if changedControl.Boolean == true then
+                  Passcode = Passcode.."1"
+				  Controls.Password_in.String = Passcode
+				  Controls.Password_Failed.Boolean = false
+                  Hidden = Hidden.."*"
+                  print("hidden= "..Hidden);
+                  Controls.Hidden_Txt.String  = Hidden
+                end				
+            end        
+		elseif k == "Key_2" then
+            v.EventHandler = function(changedControl)
+
+                if changedControl.Boolean == true then
+                  Passcode = Passcode.."2"                  
+				  Controls.Password_in.String = Passcode
+				  Controls.Password_Failed.Boolean = false
+                  Hidden = Hidden.."*"
+                  Controls.Hidden_Txt.String  = Hidden
+                end
+				
+            end  
+		elseif k == "Key_3" then
+            v.EventHandler = function(changedControl)
+
+                if changedControl.Boolean == true then
+                  Passcode = Passcode.."3"
+				  Controls.Password_in.String = Passcode
+				  Controls.Password_Failed.Boolean = false
+                  Hidden = Hidden.."*"
+                  Controls.Hidden_Txt.String  = Hidden
+                end
+            end  
+		elseif k == "Key_4" then
+            v.EventHandler = function(changedControl)
+			
+                if changedControl.Boolean == true then
+                  Passcode = Passcode.."4"
+				  Controls.Password_in.String = Passcode
+				  Controls.Password_Failed.Boolean = false
+                  Hidden = Hidden.."*"
+                  Controls.Hidden_Txt.String  = Hidden
+                end
+            end  
+		elseif k == "Key_5" then
+            v.EventHandler = function(changedControl)
+
+                if changedControl.Boolean == true then
+                  Passcode = Passcode.."5"
+				  Controls.Password_in.String = Passcode
+				  Controls.Password_Failed.Boolean = false
+                  Hidden = Hidden.."*"
+                  Controls.Hidden_Txt.String  = Hidden
+                end
+            end  
+        elseif k == "Key_6" then
+            v.EventHandler = function(changedControl)
+
+                if changedControl.Boolean == true then
+                  Passcode = Passcode.."6"
+				  Controls.Password_in.String = Passcode
+				  Controls.Password_Failed.Boolean = false
+                  Hidden = Hidden.."*"
+                  Controls.Hidden_Txt.String  = Hidden
+                end
+            end  
+		elseif k == "Key_7" then
+            v.EventHandler = function(changedControl)
+
+                if changedControl.Boolean == true then
+                  Passcode = Passcode.."7"
+				  Controls.Password_in.String = Passcode
+				  Controls.Password_Failed.Boolean = false
+                  Hidden = Hidden.."*"
+                  Controls.Hidden_Txt.String  = Hidden
+                end
+            end  
+		 elseif k == "Key_8" then
+            v.EventHandler = function(changedControl) 
+                if changedControl.Boolean == true then
+                  Passcode = Passcode.."8"
+				  Controls.Password_in.String = Passcode
+				  Controls.Password_Failed.Boolean = false
+                  Hidden = Hidden.."*"
+                  Controls.Hidden_Txt.String  = Hidden
+                end
+            end  
+		elseif k == "Key_9" then
+            v.EventHandler = function(changedControl)
+                if changedControl.Boolean == true then
+                  Passcode = Passcode.."9"
+				  Controls.Password_in.String = Passcode
+				  Controls.Password_Failed.Boolean = false
+                  Hidden = Hidden.."*"
+                  Controls.Hidden_Txt.String  = Hidden
+                end
+            end  
+		elseif k == "Key_0" then
+            v.EventHandler = function(changedControl)
+
+                if changedControl.Boolean == true then
+                  Passcode = Passcode.."0"
+				  Controls.Password_in.String = Passcode
+				  Controls.Password_Failed.Boolean = false
+                  Hidden = Hidden.."*"
+                  Controls.Hidden_Txt.String  = Hidden
+                end
+            end
+		elseif k == "Key_*" then
+            v.EventHandler = function(changedControl)
+
+                if changedControl.Boolean == true then
+                  Passcode = Passcode.."*"
+				  Controls.Password_in.String = Passcode
+				  Controls.Password_Failed.Boolean = false
+                  Hidden = Hidden.."*"
+                  Controls.Hidden_Txt.String  = Hidden
+                end
+            end
+		elseif k == "Key_#" then
+            v.EventHandler = function(changedControl)
+
+                if changedControl.Boolean == true then
+                  Passcode = Passcode.."#"
+				  Controls.Password_in.String = Passcode
+				  Controls.Password_Failed.Boolean = false
+                  Hidden = Hidden.."*"
+                  Controls.Hidden_Txt.String  = Hidden
+                end
+            end
+		elseif k == "Key_Clear" then
+            v.EventHandler = function(changedControl)
+
+                if changedControl.Boolean == true then
+                  Passcode = ""
+				  Controls.Password_in.String = Passcode
+                  Hidden = ""
+                  Controls.Hidden_Txt.String  = Hidden
+				  Controls.Password_Failed.Boolean = false
+                end
+            end
+		elseif k == "Key_Enter" then
+            v.EventHandler = function(changedControl)
+				
+                if changedControl.Boolean == true then
+                  if string.match(Properties["Password"].Value,Passcode)  then
+					if string.len(Properties["Password"].Value) == string.len(Passcode) then
+						print("match");
+						Controls.Password_Match.Boolean = true
+						pulse_timer:Start(2)
+					    Passcode = ""
+                        Hidden = ""
+						Controls.Password_in.String = Passcode
+                        Controls.Hidden_Txt.String  = Hidden
+					else
+						
+					end
+				  else
+				    print("failed")
+					Controls.Password_Failed.Boolean = true
+					Passcode = ""
+                    Hidden = ""
+				  end
+                end
+				Controls.Password_in.String = Passcode
+                Controls.Hidden_Txt.String  = Hidden
+				print(Passcode)
+           end
+       end
+    end
+	if Properties then       
+        Password.code = Properties["Password"].Value
+        if Properties["Password"].Value == null then
+            print("Passcode not set")
+        end
+	end
+	pulse_timer.EventHandler = function()
+		Controls.Password_Match.Boolean = false
+		pulse_timer:Stop()
+	end
+end
